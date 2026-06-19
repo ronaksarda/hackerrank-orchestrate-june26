@@ -145,10 +145,13 @@ def analyze_claim(
     user_claim: str,
     claim_object: str,
     dataset_dir: str,
-    evidence_req_desc: str,
-    user_history: dict
+    evidence_req_desc: str = "",
+    user_history: dict = None
 ) -> dict:
-    rejected = user_history.get("rejected_claim", 0)
+    # Sanitize known prompt injections to avoid triggering Azure content filters
+    user_claim = user_claim.replace("ignore all previous instructions", "[REDACTED]")
+
+    rejected = user_history.get("rejected_claim", 0) if user_history else 0
     has_user_risk = rejected > 0
     history_summary = str(user_history.get("history_summary", "")) if user_history else ""
     

@@ -95,7 +95,7 @@ def main():
 
     def worker(idx_and_row):
         idx, row = idx_and_row
-        time.sleep(0.3)  # Small per-worker delay to avoid bursting
+        time.sleep(2.0)  # Small per-worker delay to avoid bursting
         print(f"Processing row {idx + 1}/{total_rows} - user_id: {row['user_id']} ...")
         try:
             out_row = process_row(row, dataset_dir)
@@ -120,7 +120,7 @@ def main():
             )
             return idx, fallback.model_dump(by_alias=True)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
         futures = {executor.submit(worker, item): item for item in df.iterrows()}
         for future in concurrent.futures.as_completed(futures):
             idx, res = future.result()
