@@ -85,6 +85,9 @@ def evaluate():
         "severity", "valid_image", "evidence_standard_met"
     ]
     
+    if os.path.exists("mismatches.txt"):
+        os.remove("mismatches.txt")
+    
     for strategy_name, strategy_fn in [("Strategy A (Single-shot Analyzer)", strategy_a_process)]:
         predictions = []
         start_time = time.time()
@@ -110,6 +113,12 @@ def evaluate():
                 pred_val = str(pred.get(col, "")).strip().lower()
                 if gt_val == pred_val:
                     correct[col] += 1
+                elif col in ["issue_type", "severity"]:
+                    with open("mismatches.txt", "a") as f:
+                        f.write(f"USER: {gt['user_id']} | CLAIM: {gt['user_claim']}\n")
+                        f.write(f"FIELD: {col} | GT: {gt_val} | PRED: {pred_val}\n")
+                        f.write(f"JUSTIFICATION: {pred.get('claim_status_justification', '')}\n")
+                        f.write("-" * 40 + "\n")
                     
         print(f"\n--- {strategy_name} Accuracy ---")
         for col in eval_cols:

@@ -7,8 +7,8 @@ from pipeline.cache_utils import load_cache, save_cache, TEXT_CACHE_PATH
 
 # Initialize client for Azure OpenAI
 client = AzureOpenAI(
-    azure_endpoint=os.getenv("OPENAI_BASE_URL", "https://foundry-misc-dev.services.ai.azure.com/").replace("/openai/v1", ""),
-    api_key=os.getenv("OPENAI_API_KEY"),
+    azure_endpoint=os.getenv("OPENAI_BASE_URL", "").replace("/openai/v1", ""),
+    api_key=os.getenv("OPENAI_API_KEY", ""),
     api_version="2024-02-01"
 )
 
