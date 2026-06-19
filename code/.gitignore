@@ -1,0 +1,20 @@
+# secrets
+.env
+**/.env
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# cache + outputs you don't want committed mid-dev
+.cache/
+*.pyc
+
+# OS junk
+.DS_Store
+Thumbs.db
+output.csv
+mismatches*.txt
+sample_predictions.csv
