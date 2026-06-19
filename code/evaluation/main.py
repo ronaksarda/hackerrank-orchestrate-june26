@@ -14,59 +14,7 @@ load_dotenv()
 from main import process_row as strategy_a_process
 from pipeline.decision import load_static_data
 
-def strategy_b_process(row, dataset_dir):
-    from pipeline.claim_parser import parse_claim
-    from pipeline.vision_review import inspect_image
-    from pipeline.decision import get_user_risk_flags
-    from pipeline.schema import OutputRow, IssueType, ClaimStatus, Severity, normalize_object_part
-    
-    parsed = parse_claim(row['user_claim'], row['claim_object'])
-    
-    image_paths = row['image_paths'].split(";")
-    visions = []
-    for ipath in image_paths:
-        full_path = os.path.join(dataset_dir, ipath.strip())
-        visions.append(inspect_image(full_path, parsed.claim_object, parsed.object_part, parsed.issue_type, ""))
-        
-    valid_img = all(v.is_valid_image for v in visions)
-    evidence_met = any(v.detected_issue != "none" and v.detected_issue != "unknown" for v in visions)
-    
-    severities = [v.severity for v in visions if v.severity not in ("unknown", "none")]
-    severity = severities[0] if severities else "unknown"
-    
-    detected_parts = [v.detected_part for v in visions if v.detected_part != "unknown"]
-    object_part = detected_parts[0] if detected_parts else parsed.object_part
-    
-    detected_issues = [v.detected_issue for v in visions if v.detected_issue not in ("unknown", "none")]
-    issue_type = detected_issues[0] if detected_issues else parsed.issue_type
-    
-    risk_flags = get_user_risk_flags(row['user_id'])
-    
-    try:
-        issue_type_enum = IssueType(issue_type)
-    except:
-        issue_type_enum = IssueType.UNKNOWN
-    try:
-        sev_enum = Severity(severity)
-    except:
-        sev_enum = Severity.UNKNOWN
-        
-    return OutputRow(
-        user_id=row['user_id'],
-        image_paths=row['image_paths'],
-        user_claim=row['user_claim'],
-        claim_object=row['claim_object'],
-        evidence_standard_met=str(evidence_met).lower(),
-        evidence_standard_met_reason="Evaluated by Strategy B",
-        risk_flags=";".join(risk_flags) if risk_flags else "none",
-        issue_type=issue_type_enum,
-        object_part=normalize_object_part(object_part, row['claim_object']),
-        claim_status=ClaimStatus.SUPPORTED if evidence_met else ClaimStatus.CONTRADICTED,
-        claim_status_justification="Evaluated by Strategy B",
-        supporting_image_ids="none",
-        valid_image=str(valid_img).lower(),
-        severity=sev_enum
-    )
+
 
 def evaluate():
     dataset_dir = os.path.join(code_dir, "..", "dataset")
